@@ -1,5 +1,9 @@
 Resources[
     Version[1],
+    Sources[
+        Directory["~/Operators"],
+        Directory["~"]
+    ],
     ExecutionBuildCommand["<<HPM`"],
     Paclet[
         FunctionPaclet[False]

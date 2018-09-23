@@ -20,7 +20,7 @@ HPMTerms::usage =
 HPMTerms[Lsym_, Asym_, guessfn_, n_] :=
 	ReleaseHold@ReplaceAll[Hold[SolveDeformation[ 
 		LinearSolver[Lsym, p], 
-		SolutionHomotopy[Lsym,Asym,v0][v, p],
+		SolutionHomotopy[Lsym,Asym,v0],
 		v, 
 		v0,
 		p,
@@ -31,13 +31,22 @@ Operator[Burgers1] = (D[#,t] + # D[#,x1] + D[#,{x1,2}])&
 NSpaceDims[Burgers1] = 1
 InitialGuess[Burgers1][x_,t_] = (\[Alpha] + \[Beta] + (\[Beta] - \[Alpha]) e^\[Gamma])/(
  1 + e^\[Gamma]) /. {\[Gamma] -> \[Alpha]/\[Epsilon] (x - \[Lambda])}
+RelevantDerivatives[Burgers1, pastsolns_List] := Catenate[RelevantDerivatives /@ pastsolns]
+RelevantDerivatives[Burgers1, pastsoln_] := {pastsoln, D[pastsoln, x], D[pastsoln, {x,2}]}
+
+Deformation[H_,v_,n_] := Derivative[0,n][H][v,0]
+DerivP[v_, i_,nspacedims_] := ((Derivative @@ {Sequence @@ ConstantArray[0, nspacedims+1], i}) @ v) @@ {SpatioTemporalParams[nspacedims],0} 
 
 Operator[TimeDerivative] = (Derivative[#,t])&
-LinearSolver[TimeDerivative, p_][lastv_, lastH_, pastsolns_] :=
-	MySimplify[Integrate[Solve[D[lastH,p], D[D[lastv, p], t]], t]]
+LinearSolver[TimeDerivative, Asym_, v_, H_][pastsolns_] :=
+	OneVariableSolve[UsePastSolns[Asym, Deformation[H,v,n], pastsolns], DerivP[v,n,nspacedims], t]
 
 Begin["`Private`"]
 (* Implementation of the package *)
+
+UsePastSolns[Asym_, deformation_, pastsolns_] := deformation /. RelevantDerivatives[Asym, pastsolns]
+
+OneVariableSolve[eqn_, target_, var_] := MySimplify[Integrate[Solve[eqn, D[target,var]], var]]
 
 MySimplify[expr_] := FullSimplify[expr /. {Log[e] -> 1}]
 

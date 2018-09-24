@@ -19,48 +19,48 @@ HPMTerms::usage =
 
 HPMTerms[Lsym_, Asym_, guessfn_, n_] :=
 	ReleaseHold@ReplaceAll[Hold[SolveDeformation[ 
-		LinearSolver[Lsym, p], 
-		SolutionHomotopy[Lsym,Asym,v0],
+		LinearSolver[Lsym, Asym, v, v0], 
 		v, 
 		v0,
 		p,
 		n]],{v0 -> guessfn @@ SpatioTemporalParams[NSpaceDims[Asym]], 
-			v -> DeformingFunction[NSpaceDims[Asym], p]}]
+			v -> Phi}]
 
+(* Burgers1-specific definitions *)
 Operator[Burgers1] = (D[#,t] + # D[#,x1] + D[#,{x1,2}])&
-NSpaceDims[Burgers1] = 1
+NSpace[Burgers1] = 1
 InitialGuess[Burgers1][x_,t_] = (\[Alpha] + \[Beta] + (\[Beta] - \[Alpha]) e^\[Gamma])/(
  1 + e^\[Gamma]) /. {\[Gamma] -> \[Alpha]/\[Epsilon] (x - \[Lambda])}
 RelevantDerivatives[Burgers1, pastsolns_List] := Catenate[RelevantDerivatives /@ pastsolns]
 RelevantDerivatives[Burgers1, pastsoln_] := {pastsoln, D[pastsoln, x], D[pastsoln, {x,2}]}
 
-Deformation[H_,v_,n_] := Derivative[0,n][H][v,0]
-DerivP[v_, i_,nspacedims_] := ((Derivative @@ {Sequence @@ ConstantArray[0, nspacedims+1], i}) @ v) @@ {SpatioTemporalParams[nspacedims],0} 
-
+(* TimeDerivative linear operator definitions *) 
 Operator[TimeDerivative] = (Derivative[#,t])&
-LinearSolver[TimeDerivative, Asym_, v_, H_][pastsolns_] :=
-	OneVariableSolve[UsePastSolns[Asym, Deformation[H,v,n], pastsolns], DerivP[v,n,nspacedims], t]
+LinearSolver[TimeDerivative, Asym_, v_, v0_][pastsolns_, n_] :=
+	MySimplify[OneVariableSolve[
+		UsePastSolns[Asym, 
+			Deformation[SolutionHomotopy[TimeDerivative,Asym,v0],v,n], 
+			pastsolns], 
+		DerivP[Asym,v,n], t]]
 
 Begin["`Private`"]
 (* Implementation of the package *)
 
+(* General definitions *)
 UsePastSolns[Asym_, deformation_, pastsolns_] := deformation /. RelevantDerivatives[Asym, pastsolns]
-
-OneVariableSolve[eqn_, target_, var_] := MySimplify[Integrate[Solve[eqn, D[target,var]], var]]
-
+Deformation[H_,v_,n_] := Derivative[0,n][H][v,0]
+DerivP[Asym_, v_, i_] := ((Derivative @@ {Sequence @@ ConstantArray[0, NSpace[Asym]+1], i}) @ v) @@ {SpatioTemporalParams[NSpace[Asym]],0} 
+OneVariableSolve[eqn_, target_, var_] := Integrate[Solve[eqn, D[target,var]], var]
 MySimplify[expr_] := FullSimplify[expr /. {Log[e] -> 1}]
 
-DeformingFunction[n_, p_] := Phi @@ DeformingFunctionParams[n, p]
-
-SpatioTemporalParams[1] := {x, t}
-SpatioTemporalParams[n_] := {Sequence[Array[x,n]], t}
-DeformingFunctionParams[n_, p_] := {Sequence @@ SpatioTemporalParams[n], p}
+SpatioTemporalParams[1] := Sequence[x, t]
+SpatioTemporalParams[n_] := Sequence[Sequence @@ Array[x,n], t]
 
 SolutionHomotopy[Lsym_, Asym_, v0_][v_, q_] := (1-q) Operator[Lsym][v - v0] + q Operator[Asym][v]
 
 (* TODO: Untested for multi-variable *)
 SolveDeformation[solver_, H_, v_, v0_List, p_, 0] :=
-	Sequence @@ {v, MapThread[((# /. p -> 0) -> #2)&, {v, v0}], H}
+	Sequence @@ {v[SpatioTemporalParams[Asym],0], MapThread[((# /. p -> 0) -> #2)&, {v, v0}], H}
 	
 (* TODO: Untested for one-variable *)
 SolveDeformation[solver_, H_, v_, v0_, p_, 0] :=

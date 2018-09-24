@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      5377,        180]
-NotebookOptionsPosition[      4814,        155]
-NotebookOutlinePosition[      5153,        170]
-CellTagsIndexPosition[      5110,        167]
+NotebookDataLength[      5468,        175]
+NotebookOptionsPosition[      5004,        154]
+NotebookOutlinePosition[      5343,        169]
+CellTagsIndexPosition[      5300,        166]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -25,11 +25,36 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{"Hits", " ", "recursion", " ", 
+   RowBox[{"limit", ":", "\[IndentingNewLine]", 
+    RowBox[{"SumConvergence", "[", 
+     RowBox[{
+      RowBox[{"HPMTerms", "[", 
+       RowBox[{"TimeDerivative", ",", " ", "Burgers1", ",", " ", 
+        RowBox[{"InitialGuess", "[", "Burgers1", "]"}], ",", " ", "n"}], 
+       "]"}], ",", "n"}], "]"}]}]}], " ", "*)"}]], "Input",
+ CellChangeTimes->{{3.74681020259414*^9, 3.746810212746607*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "$RecursionLimit","reclim2",
+   "\"Recursion depth of \\!\\(\\*RowBox[{\\\"1024\\\"}]\\) exceeded during \
+evaluation of \\!\\(\\*RowBox[{RowBox[{\\\"-\\\", \\\"1021\\\"}], \\\"+\\\", \
+\\\"n\\\"}]\\).\"",2,2,1,26556631547900668641,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.746809234879922*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
  RowBox[{"HPMTerms", "[", 
-  RowBox[{"TimeDerivative", ",", " ", "Burgers1", ",", " ", 
-   RowBox[{"InitialGuess", "[", "Burgers1", "]"}], ",", " ", "1"}], 
-  "]"}]], "Input",
- CellChangeTimes->{{3.74679497858387*^9, 3.746795010310903*^9}}],
+  RowBox[{"TimeDerivative", ",", "Burgers1", ",", 
+   RowBox[{"InitialGuess", "[", "Burgers1", "]"}], ",", "2"}], "]"}]], "Input",
+ CellChangeTimes->{{3.746809248684598*^9, 3.7468092591654*^9}, {
+  3.746809379173766*^9, 3.746809380363901*^9}, {3.746809612390769*^9, 
+  3.7468096313535147`*^9}, {3.746810119601018*^9, 3.746810119731388*^9}}],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -56,101 +81,75 @@ Cell[BoxData[
           RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]]}]]}], ",", 
    
    RowBox[{
-    RowBox[{"Phi", "[", 
-     RowBox[{"x", ",", "t", ",", "0"}], "]"}], "\[Rule]", "0"}]}], 
-  "}"}]], "Output",
- CellChangeTimes->{{3.746795007117464*^9, 3.746795010961897*^9}}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"solver", "=", 
-  RowBox[{"ReleaseHold", "@", 
-   RowBox[{"ReplaceAll", "[", 
     RowBox[{
-     RowBox[{"Hold", "[", 
-      RowBox[{"LinearSolver", "[", 
-       RowBox[{"TimeDerivative", ",", "Burgers1", ",", "v", ",", "v0"}], 
-       "]"}], "]"}], ",", " ", 
-     RowBox[{"{", 
-      RowBox[{
-       RowBox[{"v0", "\[Rule]", 
-        RowBox[{"guessfn", "[", 
-         RowBox[{"SpatioTemporalParams", "[", "Asym", "]"}], "]"}]}], ",", 
-       RowBox[{"v", "\[Rule]", "Phi"}]}], "}"}]}], "]"}]}]}]], "Input",
- CellChangeTimes->{{3.746795049264675*^9, 3.746795075695526*^9}, {
-  3.746795148122552*^9, 3.746795152156746*^9}}],
-
-Cell[BoxData[
- RowBox[{"LinearSolver", "[", 
-  RowBox[{"Lsym", ",", "Asym", ",", "Phi", ",", 
-   RowBox[{"guessfn", "[", 
-    RowBox[{"SpatioTemporalParams", "[", 
-     RowBox[{"NSpace", "[", "Asym", "]"}], "]"}], "]"}]}], "]"}]], "Output",
- CellChangeTimes->{{3.7467950691834173`*^9, 3.746795076318666*^9}}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"solver", "[", 
-  RowBox[{
-   RowBox[{"{", 
+     SuperscriptBox["Phi", 
+      TagBox[
+       RowBox[{"(", 
+        RowBox[{"0", ",", "0", ",", "1"}], ")"}],
+       Derivative],
+      MultilineFunction->None], "[", 
+     RowBox[{"x", ",", "t", ",", "0"}], "]"}], "\[Rule]", 
+    FractionBox[
+     RowBox[{"2", " ", 
+      SuperscriptBox["e", 
+       FractionBox[
+        RowBox[{"\[Alpha]", " ", 
+         RowBox[{"(", 
+          RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]], " ", "t", 
+      " ", 
+      SuperscriptBox["\[Alpha]", "2"], " ", "\[Beta]"}], 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{"1", "+", 
+         SuperscriptBox["e", 
+          FractionBox[
+           RowBox[{"\[Alpha]", " ", 
+            RowBox[{"(", 
+             RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]]}], 
+        ")"}], "2"], " ", "\[Epsilon]"}]]}], ",", 
+   RowBox[{
     RowBox[{
-     RowBox[{"Phi", "[", 
-      RowBox[{"x", ",", "t", ",", "0"}], "]"}], "\[Rule]", 
-     FractionBox[
-      RowBox[{"\[Alpha]", "+", "\[Beta]", "+", 
+     SuperscriptBox["Phi", 
+      TagBox[
+       RowBox[{"(", 
+        RowBox[{"0", ",", "0", ",", "2"}], ")"}],
+       Derivative],
+      MultilineFunction->None], "[", 
+     RowBox[{"x", ",", "t", ",", "0"}], "]"}], "\[Rule]", 
+    FractionBox[
+     RowBox[{"2", " ", 
+      SuperscriptBox["e", 
+       FractionBox[
+        RowBox[{"\[Alpha]", " ", 
+         RowBox[{"(", 
+          RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]], " ", 
+      RowBox[{"(", 
        RowBox[{
+        RowBox[{"-", "1"}], "+", 
         SuperscriptBox["e", 
          FractionBox[
           RowBox[{"\[Alpha]", " ", 
            RowBox[{"(", 
-            RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]], " ", 
-        RowBox[{"(", 
-         RowBox[{
-          RowBox[{"-", "\[Alpha]"}], "+", "\[Beta]"}], ")"}]}]}], 
-      RowBox[{"1", "+", 
-       SuperscriptBox["e", 
-        FractionBox[
-         RowBox[{"\[Alpha]", " ", 
-          RowBox[{"(", 
-           RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]]}]]}], 
-    "}"}], ",", " ", "1"}], "]"}]], "Input",
- CellChangeTimes->{{3.746795078567956*^9, 3.746795103853595*^9}}],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"LinearSolver", "[", 
-   RowBox[{"Lsym", ",", "Asym", ",", "Phi", ",", 
-    RowBox[{"guessfn", "[", 
-     RowBox[{"SpatioTemporalParams", "[", 
-      RowBox[{"NSpace", "[", "Asym", "]"}], "]"}], "]"}]}], "]"}], "[", 
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"Phi", "[", 
-      RowBox[{"x", ",", "t", ",", "0"}], "]"}], "\[Rule]", 
-     FractionBox[
-      RowBox[{"\[Alpha]", "+", "\[Beta]", "+", 
-       RowBox[{
-        SuperscriptBox["e", 
-         FractionBox[
-          RowBox[{"\[Alpha]", " ", 
-           RowBox[{"(", 
-            RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]], " ", 
-        RowBox[{"(", 
-         RowBox[{
-          RowBox[{"-", "\[Alpha]"}], "+", "\[Beta]"}], ")"}]}]}], 
-      RowBox[{"1", "+", 
-       SuperscriptBox["e", 
-        FractionBox[
-         RowBox[{"\[Alpha]", " ", 
-          RowBox[{"(", 
-           RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]]}]]}], 
-    "}"}], ",", "1"}], "]"}]], "Output",
- CellChangeTimes->{3.7467951044045153`*^9}]
+            RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]]}], ")"}],
+       " ", 
+      SuperscriptBox["t", "2"], " ", 
+      SuperscriptBox["\[Alpha]", "3"], " ", 
+      SuperscriptBox["\[Beta]", "2"]}], 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{"1", "+", 
+         SuperscriptBox["e", 
+          FractionBox[
+           RowBox[{"\[Alpha]", " ", 
+            RowBox[{"(", 
+             RowBox[{"x", "-", "\[Lambda]"}], ")"}]}], "\[Epsilon]"]]}], 
+        ")"}], "3"], " ", 
+      SuperscriptBox["\[Epsilon]", "2"]}]]}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.7468092602759457`*^9, 3.746809273362926*^9}, 
+   3.7468093814465237`*^9, {3.746809617671369*^9, 3.7468096440504513`*^9}, 
+   3.74681012036875*^9, 3.7468101509435673`*^9, 3.746810192688884*^9}]
 }, Open  ]]
 },
 WindowSize->{808, 876},
@@ -169,22 +168,16 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 114, 2, 46, "Input"],
+Cell[558, 20, 114, 2, 32, "Input"],
 Cell[CellGroupData[{
-Cell[697, 26, 254, 5, 48, "Input"],
-Cell[954, 33, 903, 28, 80, "Output"]
+Cell[697, 26, 472, 10, 56, "Input"],
+Cell[1172, 38, 355, 7, 23, "Message"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1894, 66, 645, 16, 79, "Input"],
-Cell[2542, 84, 308, 6, 48, "Output"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[2887, 95, 861, 25, 89, "Input"],
-Cell[3751, 122, 1047, 30, 118, "Output"]
+Cell[1564, 50, 381, 6, 34, InheritFromParent],
+Cell[1948, 58, 3040, 93, 190, "Output"]
 }, Open  ]]
 }
 ]
 *)
-
-(* End of internal cache information *)
 

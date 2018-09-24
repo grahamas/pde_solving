@@ -27,7 +27,7 @@ HPMTerms[Lsym_, Asym_, guessfn_, n_] :=
 			v -> Phi}]
 
 (* Burgers1-specific definitions *)
-Operator[Burgers1] = (D[#,t] + # D[#,x] + D[#,{x,2}])&
+Operator[Burgers1] = (D[#,t] + # D[#,x] - \[Epsilon] D[#,{x,2}])&
 NSpace[Burgers1] = 1
 InitialGuess[Burgers1][x_,t_] = (\[Alpha] + \[Beta] + (\[Beta] - \[Alpha]) e^\[Gamma])/(
  1 + e^\[Gamma]) /. {\[Gamma] -> \[Alpha]/\[Epsilon] (x - \[Lambda])}

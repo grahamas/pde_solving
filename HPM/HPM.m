@@ -17,22 +17,30 @@ HPMTerms::usage =
 	expansion of the solution of A, using the homotopy perturbation method
 	with linear operator L and initial guess v0."
 
-HPMTerms[Lsym_, Asym_, guessfn_, n_] :=
+HPMTerms[Lsym_, Asym_, n_] :=
 	ReleaseHold@ReplaceAll[Hold[SolveDeformation[ 
 		LinearSolver[Lsym, Asym, v, v0], 
 		Asym,
 		v, 
 		v0,
-		n]],{v0 -> guessfn[SpatioTemporalParams[Asym]], 
+		n]],{v0 -> InitialGuess[Asym][SpatioTemporalParams[Asym]], 
 			v -> Phi}]
 
 (* Burgers1-specific definitions *)
 Operator[Burgers1] = (D[#,t] + # D[#,x] - \[Epsilon] D[#,{x,2}])&
 NSpace[Burgers1] = 1
-InitialGuess[Burgers1][x_,t_] = (\[Alpha] + \[Beta] + (\[Beta] - \[Alpha]) e^\[Gamma])/(
+InitialGuess[Burgers1][x_,t_] := (\[Alpha] + \[Beta] + (\[Beta] - \[Alpha]) e^\[Gamma])/(
  1 + e^\[Gamma]) /. {\[Gamma] -> \[Alpha]/\[Epsilon] (x - \[Lambda])}
 RelevantDerivatives[Burgers1, pastsolns_List] := Catenate[(RelevantDerivatives[Burgers1,#])& /@ pastsolns]
 RelevantDerivatives[Burgers1, pastsoln_] := {pastsoln, D[pastsoln, x], D[pastsoln, {x,2}]}
+
+(* Burgers2-specific definitions *)
+Operator[Burgers2] = ({
+	D[#1,t] - D[#1, {x,2}] - 2 #1 D[#1, x] + D[#1 #2, x],
+	D[#2,t] - D[#2, {x,2}] - 2 #2 D[#2, x] + D[#2 #1, x]})&
+NSpace[Burgers2] = 1
+InitialGuess[Burgers2][x_,t_] := {Sin[x], Sin[x]}
+RelevantDerivatives[Burgers2, pastsoln_] := RelevantDerivatives[Burgers1, pastsoln]
 
 (* TimeDerivative linear operator definitions *) 
 Operator[TimeDerivative] = (D[#,t])&  (* WARNING: Is this right??? Might need to be Derivative and specify by position *)

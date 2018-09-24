@@ -52,9 +52,6 @@ LinearSolver[TimeDerivative, Asym_, v_, v0_][pastsolns_, n_] :=
 			pastsolns], 
 		DerivP[Asym,v,n], t][[1]]
 
-(* Implementation of the package *)
-
-Begin["`Private`"]
 (* General definitions *)
 UsePastSolns[Asym_, deformation_, pastsolns_] := deformation /. RelevantDerivatives[Asym, pastsolns]
 Deformation[H_,v_,n_] := Derivative[0,n][H][v,0]
@@ -84,7 +81,9 @@ SolveDeformation[solver_, Asym_, v_, v0_, 0] :=
 SolveDeformation[solver_, Asym_, v_, v0_, n_] := 
 	ReleaseHold@ReplaceAll[Hold[Catenate[{pastsoln, solver[pastsoln, n]}]], 
 		pastsoln -> SolveDeformation[solver, Asym, v, v0, n-1]]
-
+		
+Begin["`Private`"]
+(* No need for private functions when there's only one module... *)
 End[]
 
 EndPackage[]

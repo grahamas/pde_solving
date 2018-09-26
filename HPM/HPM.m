@@ -5,50 +5,41 @@
 BeginPackage["HPM`"]
 (* Exported symbols added here with SymbolName::usage *) 
 
-SolutionHomotopy::usage = 
-	"SolutionHomotopy[L,A,v0] gives a homotopy H[v,q] of v from the 
-	initial guess, v0, at q=0, to the solution of A, at q=1. 
-	L is a well-chosen linear operator.
-	A is the nonlinear differential operator we wish to solve.
-	v0 is the initial guess."
-
-HPMTerms::usage =
-	"HPMTerms[L, A, v0, n] gives the first n terms of the Taylor
-	expansion of the solution of A, using the homotopy perturbation method
-	with linear operator L and initial guess v0."
-
 HPMTerms[Lsym_, Asym_, n_] :=
 	ReleaseHold@ReplaceAll[Hold[SolveDeformation[ 
 		LinearSolver[Lsym, Asym, v, v0], 
 		Asym,
 		v, 
 		v0,
-		n]],{v0 -> InitialGuess[Asym][SpatioTemporalParams[Asym]], 
-			v -> Phi}]
+		n]], {v -> DeformingFunction[Asym], v0 -> InitialGuess[Asym]}]
 
 (* Burgers1-specific definitions *)
-Operator[Burgers1] = (D[#,t] + # D[#,x] - \[Epsilon] D[#,{x,2}])&
+Operator[Burgers1,v_,args__] := D[v[args],t] + v[args] D[v[args],x] - \[Epsilon] D[v[args],{x,2}]
 NSpace[Burgers1] = 1
-InitialGuess[Burgers1][x_,t_] := (\[Alpha] + \[Beta] + (\[Beta] - \[Alpha]) e^\[Gamma])/(
- 1 + e^\[Gamma]) /. {\[Gamma] -> \[Alpha]/\[Epsilon] (x - \[Lambda])}
+NSystem[Burgers1] = 1
+InitialGuess[Burgers1] = ((\[Alpha] + \[Beta] + (\[Beta] - \[Alpha]) e^\[Gamma])/(
+ 1 + e^\[Gamma]) /. {\[Gamma] -> \[Alpha]/\[Epsilon] (# - \[Lambda])})&[x,t]
 RelevantDerivatives[Burgers1, pastsolns_List] := Catenate[(RelevantDerivatives[Burgers1,#])& /@ pastsolns]
 RelevantDerivatives[Burgers1, pastsoln_] := {pastsoln, D[pastsoln, x], D[pastsoln, {x,2}]}
 
 (* Burgers2-specific definitions *)
-Operator[Burgers2] = ({
-	D[#1,t] - D[#1, {x,2}] - 2 #1 D[#1, x] + D[#1 #2, x],
-	D[#2,t] - D[#2, {x,2}] - 2 #2 D[#2, x] + D[#2 #1, x]})&
+Operator[Burgers2,{v1_, v2_},args__] := {
+	D[v1[args],t] - D[v1[args], {x,2}] - 2 v1[args] D[v1[args], x] + D[v1[args] v2[args], x],
+	D[v2[args],t] - D[v2[args], {x,2}] - 2 v2[args] D[v2[args], x] + D[v2[args] v1[args], x]}
 NSpace[Burgers2] = 1
-InitialGuess[Burgers2][x_,t_] := {Sin[x], Sin[x]}
+NSystem[Burgers2] = 2
+InitialGuess[Burgers2] = ({Sin[#], Sin[#]})&[x,t]
 RelevantDerivatives[Burgers2, pastsoln_] := RelevantDerivatives[Burgers1, pastsoln]
 
 (* TimeDerivative linear operator definitions *) 
-Operator[TimeDerivative] = (D[#,t])&  (* WARNING: Is this right??? Might need to be Derivative and specify by position *)
+Operator[TimeDerivative,Asym_Symbol,args__] = Operator[TimeDerivative,InitialGuess[Asym],NSystem[Asym],args]
+Operator[TimeDerivative,v0_,1,v_,args__] := D[v[args] - v0,t]  (* WARNING: Is this right??? Might need to be Derivative and specify by position *)
+Operator[TimeDerivative,v0_,n_,vl_List,args__] := Function[v, D[v[args] - v0, t]] /@ vl
 LinearSolver[TimeDerivative, Asym_, v_, v0_][pastsolns_, n_] :=
 	OneVariableSolveZeroBoundary[
 		UsePastSolns[
 			Asym, 
-			Deformation[SolutionHomotopy[TimeDerivative,Asym,v0],v,n], 
+			Deformation[SolutionHomotopy[TimeDerivative,Asym],v,n], 
 			pastsolns], 
 		DerivP[Asym,v,n], t][[1]]
 
@@ -60,16 +51,19 @@ OneVariableSolveZeroBoundary[eqn_, target_, var_] :=
 	MySimplify[Solve[Integrate[eqn, var] == 0, target]]
 MySimplify[expr_] := FullSimplify[expr /. {Log[e] -> 1}]
 
+DeformingFunction[Asym_Symbol] := DeformingFunction[NSystem[Asym]]
+DeformingFunction[1] = Phi 
+DeformingFunction[n_Integer] := Array[Phi,n]
+
 SpatioTemporalParams[1] := Sequence[x, t]
 SpatioTemporalParams[n_Integer] := Sequence[Sequence @@ Array[x,n], t]
 SpatioTemporalParams[sym_Symbol] := SpatioTemporalParams[NSpace[sym]]
 DeformationParams[norsym_, p_] := Sequence @@ {SpatioTemporalParams[norsym], p}
 P0Params[norsym_] := Sequence @@ {SpatioTemporalParams[norsym], 0}
 
+SolutionHomotopy[Lsym_, Asym_][v_, q_] := (1-q) Operator[Lsym,Asym,v,DeformationParams[Asym,q]] + q Operator[Asym,v,DeformationParams[Asym,q]] 
 
-SolutionHomotopy[Lsym_, Asym_, v0_][v_, q_] := (1-q) Operator[Lsym][v[DeformationParams[Asym,q]] - v0] + q Operator[Asym][v[DeformationParams[Asym,q]]]
-
-(* TODO: Untested for multi-variable *)
+(*TODO: Untested for multi-variable *)
 SolveDeformation[solver_, Asym_, v_, v0_List, 0] :=
 	MapThread[(#[P0Params[NSpace[Asym]]] -> #2)&, {v, v0}]
 	

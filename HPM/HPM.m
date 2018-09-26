@@ -7,7 +7,7 @@ BeginPackage["HPM`"]
 
 HPMTerms[Lsym_, Asym_, n_] :=
 	ReleaseHold@ReplaceAll[Hold[SolveDeformation[ 
-		LinearSolver[Lsym, Asym, v, v0], 
+		LinearSolver[Lsym, Asym, v], 
 		Asym,
 		v, 
 		v0,
@@ -34,8 +34,8 @@ RelevantDerivatives[Burgers2, pastsoln_] := RelevantDerivatives[Burgers1, pastso
 (* TimeDerivative linear operator definitions *) 
 Operator[TimeDerivative,Asym_Symbol,args__] = Operator[TimeDerivative,InitialGuess[Asym],NSystem[Asym],args]
 Operator[TimeDerivative,v0_,1,v_,args__] := D[v[args] - v0,t]  (* WARNING: Is this right??? Might need to be Derivative and specify by position *)
-Operator[TimeDerivative,v0_,n_,vl_List,args__] := Function[v, D[v[args] - v0, t]] /@ vl
-LinearSolver[TimeDerivative, Asym_, v_, v0_][pastsolns_, n_] :=
+Operator[TimeDerivative,v0List_List,n_,vList_List,args__] := MapThread[Function[{v,v0}, D[v[args] - v0, t]], {vList,v0List}]
+LinearSolver[TimeDerivative, Asym_, v_][pastsolns_, n_] :=
 	OneVariableSolveZeroBoundary[
 		UsePastSolns[
 			Asym, 
@@ -43,10 +43,13 @@ LinearSolver[TimeDerivative, Asym_, v_, v0_][pastsolns_, n_] :=
 			pastsolns], 
 		DerivP[Asym,v,n], t][[1]]
 
+LinearSolver[Lsym_, Asym_, vs_List][pastsolns_, n_] :=
+	Map[(LinearSolver[Lsym,Asym,#][pastsolns,n])&, vs] 
+
 (* General definitions *)
 UsePastSolns[Asym_, deformation_, pastsolns_] := deformation /. RelevantDerivatives[Asym, pastsolns]
 Deformation[H_,v_,n_] := Derivative[0,n][H][v,0]
-DerivP[Asym_, v_, i_] := ((Derivative @@ {Sequence @@ ConstantArray[0, NSpace[Asym]+1], i}) @ v)[P0Params[NSpace[Asym]]]
+DerivP[Asym_, v_, i_] := ((Derivative @@ {Sequence @@ ConstantArray[0, NSpace[Asym]+1], i}) @ v)[P0Params[Asym]]
 OneVariableSolveZeroBoundary[eqn_, target_, var_] := 
 	MySimplify[Solve[Integrate[eqn, var] == 0, target]]
 MySimplify[expr_] := FullSimplify[expr /. {Log[e] -> 1}]
@@ -75,6 +78,12 @@ SolveDeformation[solver_, Asym_, v_, v0_, 0] :=
 SolveDeformation[solver_, Asym_, v_, v0_, n_] := 
 	ReleaseHold@ReplaceAll[Hold[Catenate[{pastsoln, solver[pastsoln, n]}]], 
 		pastsoln -> SolveDeformation[solver, Asym, v, v0, n-1]]
+		
+(* TODO: This only works assuming NSpace == 1, otherwise it could clobber other derivatives. *)
+(* TODO: This is a hack. Figure out why Derivative[...][Operator] doesn't just work. *)
+(* For some reason, Mathematica won't propagate p derivatives through "Operator." This does it by force. *)
+Derivative[zeros__, 0, 0, n_][Operator][args__, p_] := 
+ D[Operator[args, placeholder], {placeholder, n}] /. placeholder -> p		
 		
 Begin["`Private`"]
 (* No need for private functions when there's only one module... *)

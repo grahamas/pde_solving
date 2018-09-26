@@ -43,15 +43,15 @@ LinearSolver[TimeDerivative, Asym_, v_][pastsolns_, n_] :=
 			pastsolns], 
 		DerivP[Asym,v,n], t][[1]]
 
-LinearSolver[Lsym_, Asym_, vs_List][pastsolns_, n_] :=
-	Map[(LinearSolver[Lsym,Asym,#][pastsolns,n])&, vs] 
-
 (* General definitions *)
 UsePastSolns[Asym_, deformation_, pastsolns_] := deformation /. RelevantDerivatives[Asym, pastsolns]
 Deformation[H_,v_,n_] := Derivative[0,n][H][v,0]
 DerivP[Asym_, v_, i_] := ((Derivative @@ {Sequence @@ ConstantArray[0, NSpace[Asym]+1], i}) @ v)[P0Params[Asym]]
+DerivP[Asym_, vs_List, i_] := (DerivP[Asym,#,i])& /@ vs
 OneVariableSolveZeroBoundary[eqn_, target_, var_] := 
 	MySimplify[Solve[Integrate[eqn, var] == 0, target]]
+OneVariableSolveZeroBoundary[eqn_List, target_, var_] := 
+	MySimplify[Solve[(# == 0)& /@ Integrate[eqn, var], target]]
 MySimplify[expr_] := FullSimplify[expr /. {Log[e] -> 1}]
 
 DeformingFunction[Asym_Symbol] := DeformingFunction[NSystem[Asym]]

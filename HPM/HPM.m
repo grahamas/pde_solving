@@ -5,7 +5,7 @@
 BeginPackage["HPM`"]
 (* Exported symbols added here with SymbolName::usage *) 
 
-HPMTerms[Lsym_, Asym_, n_] :=
+HPMTerms[Lsym_, Asym_, n_] := HPMTerms[Lsym, Asym, n] =
 	ReleaseHold@ReplaceAll[Hold[SolveDeformation[ 
 		LinearSolver[Lsym, Asym, v], 
 		Asym,
@@ -26,15 +26,18 @@ RelevantDerivatives[Burgers1, pastsoln_] := {pastsoln, D[pastsoln, x], D[pastsol
 Operator[Burgers2,{v1_, v2_},args__] := {
 	D[v1[args],t] - D[v1[args], {x,2}] - 2 v1[args] D[v1[args], x] + D[v1[args] v2[args], x],
 	D[v2[args],t] - D[v2[args], {x,2}] - 2 v2[args] D[v2[args], x] + D[v2[args] v1[args], x]}
+Operator[Burgers2, vPlaceholder_, args__] := Hold[Operator[Burgers2,vPlaceholder,args]]
 NSpace[Burgers2] = 1
 NSystem[Burgers2] = 2
 InitialGuess[Burgers2] = ({Sin[#], Sin[#]})&[x,t]
 RelevantDerivatives[Burgers2, pastsoln_] := RelevantDerivatives[Burgers1, pastsoln]
 
+
 (* TimeDerivative linear operator definitions *) 
 Operator[TimeDerivative,Asym_Symbol,args__] = Operator[TimeDerivative,InitialGuess[Asym],NSystem[Asym],args]
 Operator[TimeDerivative,v0_,1,v_,args__] := D[v[args] - v0,t]  (* WARNING: Is this right??? Might need to be Derivative and specify by position *)
 Operator[TimeDerivative,v0List_List,n_,vList_List,args__] := MapThread[Function[{v,v0}, D[v[args] - v0, t]], {vList,v0List}]
+Operator[TimeDerivative,v0Placeholder_,n_,vPlaceholder_,args__] := Hold[Operator[TimeDerivative,v0Placeholder,n,vPlaceholder,args]]
 LinearSolver[TimeDerivative, Asym_, v_][pastsolns_, n_] :=
 	OneVariableSolveZeroBoundary[
 		UsePastSolns[
@@ -45,7 +48,7 @@ LinearSolver[TimeDerivative, Asym_, v_][pastsolns_, n_] :=
 
 (* General definitions *)
 UsePastSolns[Asym_, deformation_, pastsolns_] := deformation /. RelevantDerivatives[Asym, pastsolns]
-Deformation[H_,v_,n_] := Derivative[0,n][H][v,0]
+Deformation[H_,v_,n_] := ReleaseHold[Derivative[0,n][H][v,ppp]] /. ppp -> 0 (* Weird Hold if 0 in ppp directly *)
 DerivP[Asym_, v_, i_] := ((Derivative @@ {Sequence @@ ConstantArray[0, NSpace[Asym]+1], i}) @ v)[P0Params[Asym]]
 DerivP[Asym_, vs_List, i_] := (DerivP[Asym,#,i])& /@ vs
 OneVariableSolveZeroBoundary[eqn_, target_, var_] := 
@@ -75,7 +78,7 @@ SolveDeformation[solver_, Asym_, v_, v0_, 0] :=
 	 {v[P0Params[NSpace[Asym]]] -> v0}
 
 (* TODO: Not currently maintaining old derivatives, which would be more efficient *)
-SolveDeformation[solver_, Asym_, v_, v0_, n_] := 
+SolveDeformation[solver_, Asym_, v_, v0_, n_] := SolveDeformation[solver, Asym, v, v0, n] =
 	ReleaseHold@ReplaceAll[Hold[Catenate[{pastsoln, solver[pastsoln, n]}]], 
 		pastsoln -> SolveDeformation[solver, Asym, v, v0, n-1]]
 		

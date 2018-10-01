@@ -117,3 +117,61 @@ Test[
 	,
 	TestID->"Test-20180924-M8L8B1"
 ]
+
+
+Test[
+	HPMTerms[TimeDerivative, Burgers2, 4]
+	,
+	{Phi[1][x, t, 0] -> Sin[x], Phi[2][x, t, 0] -> Sin[x], 
+\!\(\*SuperscriptBox[\(Phi[1]\), 
+TagBox[
+RowBox[{"(", 
+RowBox[{"0", ",", "0", ",", "1"}], ")"}],
+Derivative],
+MultilineFunction->None]\)[x, t, 0] -> -t Sin[x], 
+\!\(\*SuperscriptBox[\(Phi[2]\), 
+TagBox[
+RowBox[{"(", 
+RowBox[{"0", ",", "0", ",", "1"}], ")"}],
+Derivative],
+MultilineFunction->None]\)[x, t, 0] -> -t Sin[x], 
+\!\(\*SuperscriptBox[\(Phi[1]\), 
+TagBox[
+RowBox[{"(", 
+RowBox[{"0", ",", "0", ",", "2"}], ")"}],
+Derivative],
+MultilineFunction->None]\)[x, t, 0] -> t^2 Sin[x], 
+\!\(\*SuperscriptBox[\(Phi[2]\), 
+TagBox[
+RowBox[{"(", 
+RowBox[{"0", ",", "0", ",", "2"}], ")"}],
+Derivative],
+MultilineFunction->None]\)[x, t, 0] -> t^2 Sin[x], 
+\!\(\*SuperscriptBox[\(Phi[1]\), 
+TagBox[
+RowBox[{"(", 
+RowBox[{"0", ",", "0", ",", "3"}], ")"}],
+Derivative],
+MultilineFunction->None]\)[x, t, 0] -> -t^3 Sin[x], 
+\!\(\*SuperscriptBox[\(Phi[2]\), 
+TagBox[
+RowBox[{"(", 
+RowBox[{"0", ",", "0", ",", "3"}], ")"}],
+Derivative],
+MultilineFunction->None]\)[x, t, 0] -> -t^3 Sin[x], 
+\!\(\*SuperscriptBox[\(Phi[1]\), 
+TagBox[
+RowBox[{"(", 
+RowBox[{"0", ",", "0", ",", "4"}], ")"}],
+Derivative],
+MultilineFunction->None]\)[x, t, 0] -> t^4 Sin[x], 
+\!\(\*SuperscriptBox[\(Phi[2]\), 
+TagBox[
+RowBox[{"(", 
+RowBox[{"0", ",", "0", ",", "4"}], ")"}],
+Derivative],
+MultilineFunction->None]\)[x, t, 0] -> t^4 Sin[x]}
+	,
+	TestID->"Test-20181001-G2M8Y7"
+]
+	
